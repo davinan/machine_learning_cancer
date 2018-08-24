@@ -3,6 +3,8 @@ import numpy as np
 from numpy import genfromtxt
 import numpy.matlib
 from numpy import linalg
+# Correction Matrix Plot
+import matplotlib.pyplot as plt
 
 
 diagnose = np.genfromtxt('wdbcData.csv', delimiter=',', dtype = None)
@@ -18,6 +20,7 @@ btest = btest.astype ( int )
 
 btrain = btrain - btrain
 btest = btest - btest
+
 d = 0
 cont = 0
 for i in diagnose:
@@ -76,5 +79,8 @@ for i in btest:
 acc_score = (float(len(Test)-wrongs)/len(Test))*100
 print "Accuracy: ", acc_score
 print coe
-coe = np.around(coe)
+coe = np.around(coe, decimals=0)
 print coe
+plt.plot(coe)
+plt.show()
+
