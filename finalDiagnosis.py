@@ -6,47 +6,67 @@ from numpy import linalg
 # Correction Matrix Plot
 import matplotlib.pyplot as plt
 
+# program that uses linear algebra to solve for Ax = b
+# A: matrix with patient (that had a breast cancer node) feature data
+# x: coefficient vector
+# b: vector giving the diagnosis of the breast cancer node (1 = malign, 0 = benign)
 
-diagnose = np.genfromtxt('wdbcData.csv', delimiter=',', dtype = None)
+# get feature data from the dataset
+diagnose = np.genfromtxt('wdbcData.csv', delimiter=',', dtype = None, encoding='bytes')
 
+# note: training matrices/vectors take 80% of the data and testing matrices/vectors 20%
+# training: (455 patient's breast cancer node features)
+# testing: (114 patient's breast cancer node features)
+
+# Create a matrix A for training (currently as zero vectors to be defined later)
 Atrain = np.ndarray([455, 31], dtype = float)
+Atrain = Atrain - Atrain
+# Create a matrix A' for testing (currently as zero vectors to be defined later)
 Atest = np.ndarray([114, 31], dtype = float)
+Atest = Atest - Atest
 
+# Create a vector b for training
 btrain = np.ndarray([455, 1])
-btest = np.ndarray([114, 1])
-
 btrain = btrain.astype( int )
+
+# Create a vector b' for testing trained model
+btest = np.ndarray([114, 1])
 btest = btest.astype ( int )
 
+# set both b and b' as zero vectors
+# semantically: set both vectors as if all breast cancer nodes are benign
 btrain = btrain - btrain
 btest = btest - btest
 
 d = 0
 cont = 0
+# setting the b and b' vectors
 for i in diagnose:
-    if cont < 455:
-        if i[1] == 'M':
-            btrain[d] = 1
-    else:
-        if i[1] == 'M':
-            btest[d-455] = 1
+    # set the training b vector entries that are supposed to be malign as malign
+    if cont < 455 and i[1] == 'M':
+        btrain[d] = 1
+    # set the testing b vector entries that are supposed to be malign as malign
+    elif i[1] == 'M':
+        btest[d-455] = 1
     cont = cont + 1
-    d = d+1
+    d = d + 1
 
 n = 0
-Atrain = Atrain - Atrain
-Atest = Atest - Atest
 cont = 0
+# setting the A and A' matrices
 for y in diagnose:
+    # features are in the columns 2 to 31 in the dataset
     for i in range(2, 32):
         if cont < 455:
             Atrain[n][i-2] = Atrain[n][i-2] + y[i]
         else:
             Atest[n-455][i-2] = Atest[n-455][i-2] + y[i]
-    n = n+1
+    n = n + 1
     cont = cont + 1
+
 n = 0
 cont = 0
+# todo: not sure why I did this...
 for i in range(0, 569):
     if cont < 455:
         Atrain[i][30] = 1
@@ -54,15 +74,14 @@ for i in range(0, 569):
         Atest[i-455][30] = 1
     cont = cont + 1
 
-A = np.linalg.pinv(Atrain)
-coe = np.matmul(A, btrain)
+# get the inverse of matrix A for training
+Ainv = np.linalg.pinv(Atrain)
+# get the coefficient vector x from the inverse matrix of A (solve for Ax = b)
+x = np.matmul(Ainv, btrain)
 
-#print coe
-
-Test = np.matmul(Atest, coe)
+# multiply the coefficient vector x to the testing matrix A'
+Test = np.matmul(Atest, x)
 Test = np.around(Test)
-
-#print Test
 
 wrongs = 0
 cont = 0
@@ -78,9 +97,8 @@ for i in btest:
 
 acc_score = (float(len(Test)-wrongs)/len(Test))*100
 print "Accuracy: ", acc_score
-print coe
-coe = np.around(coe, decimals=0)
-print coe
-plt.plot(coe)
-plt.show()
-
+# print x 
+coe = np.around(x, decimals=0)
+print coe 
+# plt.plot(coe)
+# plt.show()
