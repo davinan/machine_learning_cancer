@@ -6,13 +6,13 @@ from numpy import linalg
 # Correction Matrix Plot
 import matplotlib.pyplot as plt
 
-# program that uses linear algebra to solve for Ax = b
+# program that uses linear algebra to create a model to diagnose breast cancer
 # A: matrix with patient (that had a breast cancer node) feature data
 # x: coefficient vector
 # b: vector giving the diagnosis of the breast cancer node (1 = malign, 0 = benign)
 
 # get feature data from the dataset
-diagnose = np.genfromtxt('wdbcData.csv', delimiter=',', dtype = None, encoding='bytes')
+diagnose = np.genfromtxt('wdbcData.csv', delimiter=',', dtype = None, encoding='')
 
 # note: training matrices/vectors take 80% of the data and testing matrices/vectors 20%
 # training: (455 patient's breast cancer node features)
@@ -67,12 +67,12 @@ for y in diagnose:
 n = 0
 cont = 0
 # todo: not sure why I did this...
-for i in range(0, 569):
-    if cont < 455:
-        Atrain[i][30] = 1
-    else:
-        Atest[i-455][30] = 1
-    cont = cont + 1
+# for i in range(0, 569):
+#     if cont < 455:
+#         Atrain[i][30] = 1
+#     else:
+#         Atest[i-455][30] = 1
+#     cont = cont + 1
 
 # get the inverse of matrix A for training
 Ainv = np.linalg.pinv(Atrain)
@@ -80,25 +80,24 @@ Ainv = np.linalg.pinv(Atrain)
 x = np.matmul(Ainv, btrain)
 
 # multiply the coefficient vector x to the testing matrix A'
-Test = np.matmul(Atest, x)
-Test = np.around(Test)
+test_diagnosis = np.matmul(Atest, x)
+test_diagnosis = np.around(test_diagnosis)
 
 wrongs = 0
 cont = 0
 numB = 0
 for i in btest:
-    if i != Test[cont]:
+    print ("My diagnosis: " + str(test_diagnosis[cont]) + ", real diagnosis " + str(i))
+    if i != test_diagnosis[cont]:
         if i == 1:
-            if Test[cont] != 2:
+            if test_diagnosis[cont] != 2:
                 wrongs = wrongs + 1
         else:
             wrongs = wrongs + 1
     cont = cont + 1
 
-acc_score = (float(len(Test)-wrongs)/len(Test))*100
+acc_score = (float(len(test_diagnosis)-wrongs)/len(test_diagnosis))*100
 print "Accuracy: ", acc_score
-# print x 
 coe = np.around(x, decimals=0)
-print coe 
-# plt.plot(coe)
-# plt.show()
+print "coefficients: "
+print coe

@@ -91,6 +91,7 @@ for i in range(0, 33):
     cont2 = 0
     wrongcolumn[i]=0
     best = np.around(best)
+    print best 
     for y in btest:
         if y[0] != best[cont2]:
             if y == 1:
